@@ -20,7 +20,7 @@ class _Keyword_Spotting_Service:
 
     def predict(self, file_path):
         # Extract MFCCs
-
+        pass
 
 def Keyword_Spotting_Service():
 
