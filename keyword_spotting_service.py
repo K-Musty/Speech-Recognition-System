@@ -1,6 +1,6 @@
 import librosa
-import tensorflow.keras as keras
 import tensorflow as tf
+import tensorflow.keras as keras
 import numpy as np
 
 SAVED_MODEL_PATH = "model.h5"
@@ -20,7 +20,17 @@ class _Keyword_Spotting_Service:
 
     def predict(self, file_path):
         # Extract MFCCs
-        pass
+        MFCCs = self.preprocess(file_path) # ( # segment, # coefficients)
+
+        # Convert 2d MFCCs array into 4d array -> (# samples, # segments, # coefficients, # channels)
+        MFCCs = MFCCs[np.newaxis, ..., np.newaxis]
+
+        # Make prediction
+        predictions = self.model.predict(MFCCs) # [ {0.1, 0.6, 0.1, ...} ]
+        predicted_index = np.argmax(predictions)
+        predicted_keyword = self._mappings[predicted_index]
+
+        return predicted_keyword
 
 def Keyword_Spotting_Service():
 
