@@ -32,6 +32,29 @@ class _Keyword_Spotting_Service:
 
         return predicted_keyword
 
+    def preprocess(self, file_path, num_mfcc=13, n_fft=2048, hop_length=512):
+        """Extract MFCCs from audio file.
+
+        :param file_path (str): Path of audio file
+        :param num_mfcc (int): # of coefficients to extract
+        :param n_fft (int): Interval we consider to apply STFT. Measured in # of samples
+        :param hop_length (int): Sliding window for STFT. Measured in # of samples
+
+        :return MFCCs (ndarray): 2-dim array with MFCC data of shape (# time steps, # coefficients)
+        """
+
+        # Load audio file
+        signal, sample_rate = librosa.load(file_path)
+
+        if len(signal) >= SAMPLES_TO_CONSIDER:
+            # Ensure consistency of the length of the signal
+            signal = signal[:SAMPLES_TO_CONSIDER]
+
+            # Extract MFCCs
+            MFCCs = librosa.feature.mfcc(signal, sample_rate, n_mfcc=num_mfcc, n_fft=n_fft,
+                                         hop_length=hop_length)
+        return MFCCs.T
+
 def Keyword_Spotting_Service():
 
     # Ensure that we Only have one instance
