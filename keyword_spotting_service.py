@@ -1,6 +1,5 @@
 import librosa
 import tensorflow as tf
-import tensorflow.keras as keras
 import numpy as np
 
 SAVED_MODEL_PATH = "model.h5"
@@ -60,5 +59,18 @@ def Keyword_Spotting_Service():
     # Ensure that we Only have one instance
     if _Keyword_Spotting_Service._instance is None:
         _Keyword_Spotting_Service._instance = _Keyword_Spotting_Service()
-        _Keyword_Spotting_Service.model = keras.models.load_model(SAVED_MODEL_PATH)
+        _Keyword_Spotting_Service.model = tf.keras.models.load_model(SAVED_MODEL_PATH)
     return _Keyword_Spotting_Service._instance
+
+if __name__ == "__main__":
+
+    # create 2 instances of the keyword spotting service
+    kss = Keyword_Spotting_Service()
+    kss1 = Keyword_Spotting_Service()
+
+    # check that different instances of the keyword spotting service point back to the same object (singleton)
+    assert kss is kss1
+
+    # make a prediction
+    keyword = kss.predict("test/down.wav")
+    print(keyword)
