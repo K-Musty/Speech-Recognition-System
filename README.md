@@ -1,1 +1,2 @@
-# Deep-Learning Audio Application-Speech Recognition System: Keyword Spotting System
+# Deep-Learning Audio Application - Speech Recognition System
+## Keyword Spotting system
