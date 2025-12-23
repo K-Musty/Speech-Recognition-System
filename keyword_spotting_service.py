@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+
+
 import librosa
 import tensorflow as tf
 import numpy as np
