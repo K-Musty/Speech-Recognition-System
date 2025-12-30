@@ -14,7 +14,7 @@ app = Flask(__name__)
 def predict():
     
     # Get audio file and save it
-    audio_file = request.files["files"]
+    audio_file = request.files["file"]
     file_name = str(random.randint(0, 100000))
     audio_file.save(file_name)
 

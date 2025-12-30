@@ -1,16 +1,22 @@
 #!/usr/bin/python3
 import requests
 
+# server url
+URL = "http://127.0.0.1:5000/predict"
 
-URL = "http://172.0.0.1:5000/predict"
-TEST_AUDIO_FILE_PATH = "test/right.wav"
+
+# audio file we'd like to send for predicting keyword
+FILE_PATH = "test/left.wav"
+
 
 if __name__ == "__main__":
 
-    audio_file = open(TEST_AUDIO_FILE_PATH, "rb")
-    values = {"file": (TEST_AUDIO_FILE_PATH, audio_file, "audio/wave")}
+    # open files
+    file = open(FILE_PATH, "rb")
+
+    # package stuff to send and perform POST request
+    values = {"file": (FILE_PATH, file, "audio/wav")}
     response = requests.post(URL, files=values)
     data = response.json()
 
-    print(f"Predicted keyword is: {data['keyword']}")
-
+    print("Predicted keyword: {}".format(data["keyword"]))

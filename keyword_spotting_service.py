@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-
 import librosa
 import tensorflow as tf
 import numpy as np
@@ -20,15 +19,18 @@ class _Keyword_Spotting_Service:
     ]
     _instance = None
 
+    def __init__(self):
+        self.num_samples = SAMPLES_TO_CONSIDER
+
     def predict(self, file_path):
         # Extract MFCCs
-        MFCCs = self.preprocess(file_path) # ( # segment, # coefficients)
+        MFCCs = self.preprocess(file_path)  # (# segments, # coefficients)
 
         # Convert 2d MFCCs array into 4d array -> (# samples, # segments, # coefficients, # channels)
         MFCCs = MFCCs[np.newaxis, ..., np.newaxis]
 
         # Make prediction
-        predictions = self.model.predict(MFCCs) # [ {0.1, 0.6, 0.1, ...} ]
+        predictions = self.model.predict(MFCCs)  # [ {0.1, 0.6, 0.1, ...} ]
         predicted_index = np.argmax(predictions)
         predicted_keyword = self._mappings[predicted_index]
 
@@ -48,32 +50,43 @@ class _Keyword_Spotting_Service:
         # Load audio file
         signal, sample_rate = librosa.load(file_path)
 
-        if len(signal) >= SAMPLES_TO_CONSIDER:
+        if len(signal) >= self.num_samples:
             # Ensure consistency of the length of the signal
-            signal = signal[:SAMPLES_TO_CONSIDER]
+            signal = signal[:self.num_samples]
+        else:
+            # If signal is shorter than required, pad it
+            padding = self.num_samples - len(signal)
+            offset = padding // 2
+            signal = np.pad(signal, (offset, self.num_samples - len(signal) - offset), 'constant')
 
-            # Extract MFCCs
-            MFCCs = librosa.feature.mfcc(signal, sample_rate, n_mfcc=num_mfcc, n_fft=n_fft,
-                                         hop_length=hop_length)
+        # Extract MFCCs
+        MFCCs = librosa.feature.mfcc(
+            y=signal, 
+            sr=sample_rate, 
+            n_mfcc=num_mfcc, 
+            n_fft=n_fft, 
+            hop_length=hop_length
+        )
+        
         return MFCCs.T
 
-def Keyword_Spotting_Service():
 
-    # Ensure that we Only have one instance
+def Keyword_Spotting_Service():
+    # Ensure that we only have one instance
     if _Keyword_Spotting_Service._instance is None:
         _Keyword_Spotting_Service._instance = _Keyword_Spotting_Service()
         _Keyword_Spotting_Service.model = tf.keras.models.load_model(SAVED_MODEL_PATH)
     return _Keyword_Spotting_Service._instance
 
-if __name__ == "__main__":
 
-    # create 2 instances of the keyword spotting service
+if __name__ == "__main__":
+    # Create 2 instances of the keyword spotting service
     kss = Keyword_Spotting_Service()
     kss1 = Keyword_Spotting_Service()
 
-    # check that different instances of the keyword spotting service point back to the same object (singleton)
+    # Check that different instances of the keyword spotting service point back to the same object (singleton)
     assert kss is kss1
 
-    # make a prediction
+    # Make a prediction
     keyword = kss.predict("test/down.wav")
-    print(keyword)
+    print(f"Predicted keyword: {keyword}")
